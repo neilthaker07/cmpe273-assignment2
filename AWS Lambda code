@@ -1,0 +1,99 @@
+from __future__ import print_function
+
+import boto3
+import json
+
+print('Loading function')
+
+def respond(err, res=None):
+    return {
+        'statusCode': '400' if err else '200',
+        'body': err.message if err else (res),
+        'headers': {
+            'Content-Type': 'application/json',
+        },
+    }
+    
+def pizzaUpdate(x):
+    body={}
+    key={}
+    attr_name={}
+    attr_value = {}
+    item = x.get('Key')
+    key["menu_id"]=item.get('menu_id')
+    updateQuery='SET '
+    body["Key"] = key
+    if("store_name" in item):
+        attr_name["#store"]="store_name"
+        attr_value[":Store"]=item.get("store_name")
+        updateQuery  = updateQuery + "#store=:Store"
+        updateQuery = updateQuery + ","
+    if("selection" in item):
+        attr_name["#selection"]="selection"
+        attr_value[":Selection"]=item.get("selection")
+        updateQuery  = updateQuery + "#selection=:Selection"
+        updateQuery = updateQuery + ","
+    if("size" in item):
+        attr_name["#size"]="size"
+        attr_value[":Size"]=item.get("size")
+        updateQuery  = updateQuery + "#size = :Size"
+        updateQuery = updateQuery + ","
+    if("price" in item):
+        attr_name["#price"]="price"
+        attr_value[":Price"]=item.get("price")
+        updateQuery  = updateQuery + "#price = :Price"
+        updateQuery = updateQuery + ","
+    if("store_hours" in item):
+        attr_name["#store_hours"]="store_hours"
+        attr_value[":Store_hours"]=item.get("store_hours")
+        updateQuery  = updateQuery + "#store_hours = :Store_hours"
+        updateQuery = updateQuery + ","
+    body["ExpressionAttributeNames"]=attr_name
+    body["ExpressionAttributeValues"]= attr_value
+    body["TableName"]="pizza"
+    updateQuery=updateQuery[:-1]
+    body["UpdateExpression"]=updateQuery
+    print(body['UpdateExpression'])
+    return body
+
+def lambda_handler(event, context):
+    '''Demonstrates a simple HTTP endpoint using API Gateway. You have full
+    access to the request and response payload, including headers and
+    status code.
+
+    To scan a DynamoDB table, make a GET request with the TableName as a
+    query string parameter. To put, update, or delete an item, make a POST,
+    PUT, or DELETE request respectively, passing in the payload to the
+    DynamoDB API as a JSON body.
+    '''
+    #print("Received event: " + json.dumps(event, indent=2))
+
+    opers = {
+        'DELETE': lambda dynamo, x: dynamo.delete_item(**x),
+        'GET': lambda dynamo, x: dynamo.get_item(**x),
+        'POST': lambda dynamo, x: dynamo.put_item(**x),
+        'PUT': lambda dynamo, x: dynamo.update_item(**pizzaUpdate(x)),
+    }
+
+    operation = event['crud']
+    print (operation)
+    if operation == 'POST':
+        dynamodb = boto3.resource('dynamodb', region_name='us-west-1')
+        table = dynamodb.Table('pizza')
+        return respond(None, opers[operation](table, event['crud_inside']))
+    if operation == 'GET':
+        dynamodb = boto3.resource("dynamodb", region_name='us-west-1')
+        table = dynamodb.Table('pizza')
+        #print(opers[operation](table, event['crud_inside'])['Item'])
+        return respond(None, opers[operation](table, event['crud_inside']))['body']['Item']
+    if operation == 'DELETE':
+        dynamodb = boto3.resource('dynamodb', region_name='us-west-1')
+        table = dynamodb.Table('pizza')
+        return respond(None, opers[operation](table, event['crud_inside']))
+    if operation == 'PUT':
+        dynamodb = boto3.resource('dynamodb', region_name='us-west-1')
+        table = dynamodb.Table('pizza')
+        return respond(None, opers[operation](table,event['crud_inside']))
+    else:
+        return respond(ValueError('Unsupported method "{}"'.format(operation)))
+        
