@@ -1,3 +1,8 @@
+POST:
+https://zoo0ysqanl.execute-api.us-west-1.amazonaws.com/a2/menu
+
+Please check attached images.
+
 {
     "menu_id": "55",
     "store_name": "Pizza Hut",
@@ -50,8 +55,11 @@ Response :
   "statusCode": "200"
 }
 
+
+
 Request : 
 GET
+https://zoo0ysqanl.execute-api.us-west-1.amazonaws.com/a2/menu/{menu-id}
 
 Response :
 Request: /menu/55
@@ -70,6 +78,8 @@ Response :
     }   
 }
 
+DELETE : 
+https://zoo0ysqanl.execute-api.us-west-1.amazonaws.com/a2/menu/{menu-id}
 
 Request : 
 
@@ -86,7 +96,8 @@ Response :
     "Message": "Hi John Smith, please choose one of these selection:  1. Cheese, 2. Pepperoni, 3.Vegetable"
 }
 
-
+PUT : 
+https://zoo0ysqanl.execute-api.us-west-1.amazonaws.com/a2/menu/{menu-id}
 
 {
     "Message": "Which size do you want? 1. Slide, 2. Small, 3. Medium, 4. Large, 5. X-Large"
