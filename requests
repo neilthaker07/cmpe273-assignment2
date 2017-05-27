@@ -118,3 +118,8 @@ GET : /order/order_id
         "order_time": "mm-dd-yyyy@hh:mm:ss"
     }
 }
+
+
+https://6iwzl5ooye.execute-api.us-west-1.amazonaws.com/a3/order
+
+https://6iwzl5ooye.execute-api.us-west-1.amazonaws.com/a3/order/{order_id}
